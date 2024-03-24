@@ -1,19 +1,104 @@
 import numpy as np
+from sklearn.metrics import mean_squared_error
+from typing import Optional
 
-def linear_regression(X, y, learning_rate=0.01, num_iterations=1000):
-    m = len(y)  # Number of training examples
-    n = X.shape[1]  # Number of features
+class MyLinearRegression:
+    def __init__(self, fit_intercept: bool = True, lr: float = 0.01, max_iter: int = 100, sgd: bool = False, n_sample: int = 16):
+        """
+        Initialize the MyLinearRegression class.
 
-    theta = np.zeros((n, 1))
-    bias = 0
+        Parameters:
+        fit_intercept (bool): Whether to calculate the intercept for this model. If set to False, no intercept will be used in calculations.
+        lr (float): The learning rate.
+        max_iter (int): The maximum number of iterations.
+        sgd (bool): Whether to use Stochastic Gradient Descent.
+        n_sample (int): The number of samples to use for Stochastic Gradient Descent.
+        """
+        self.fit_intercept = fit_intercept
+        self.w = None
+        self.lr = lr
+        self.max_iter = max_iter
+        self.sgd = sgd
+        self.n_sample = n_sample
 
-    for iteration in range(num_iterations):
-        y_pred = np.dot(X, theta) + bias
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'MyLinearRegression':
+        """
+        Fit the model according to the given training data.
 
-        d_theta = (1/m) * np.dot(X.T, (y_pred - y))
-        d_bias = (1/m) * np.sum(y_pred - y)
+        Parameters:
+        X (np.ndarray): Training data.
+        y (np.ndarray): Target values.
 
-        theta -= learning_rate * d_theta
-        bias -= learning_rate * d_bias
+        Returns:
+        self: returns an instance of self.
+        """
+        n, k = X.shape
 
-    return theta, bias
+        if self.w is None:
+            self.w = np.random.randn(k + 1 if self.fit_intercept else k)
+
+        X_train = np.hstack((X, np.ones((n, 1)))) if self.fit_intercept else X
+
+        self.losses = []
+
+        for _ in range(self.max_iter):
+            y_pred = self.predict(X)
+            self.losses.append(mean_squared_error(y_pred, y))
+
+            grad = self.__calc_gradient(X_train, y, y_pred)
+
+            assert grad.shape == self.w.shape, f"gradient shape {grad.shape} is not equal weight shape {self.w.shape}"
+            self.w -= self.lr * grad
+
+        return self
+
+    def __calc_gradient(self, X: np.ndarray, y: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+        """
+        Calculate the gradient.
+
+        Parameters:
+        X (np.ndarray): Training data.
+        y (np.ndarray): Target values.
+        y_pred (np.ndarray): Predicted values.
+
+        Returns:
+        grad (np.ndarray): The calculated gradient.
+        """
+        if self.sgd:
+            inds = np.random.choice(np.arange(X.shape[0]), size=self.n_sample, replace=False)
+            grad = 2 * (y_pred[inds] - y[inds])[:, np.newaxis] * X[inds]
+        else:
+            grad = 2 * (y_pred - y)[:, np.newaxis] * X
+        return grad.mean(axis=0)
+
+    def get_losses(self) -> list:
+        """
+        Get the losses.
+
+        Returns:
+        losses (list): The losses.
+        """
+        return self.losses
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict using the linear model.
+
+        Parameters:
+        X (np.ndarray): Samples.
+
+        Returns:
+        y_pred (np.ndarray): Returns predicted values.
+        """
+        n, k = X.shape
+        X_train = np.hstack((X, np.ones((n, 1)))) if self.fit_intercept else X
+        return X_train @ self.w
+
+    def get_weights(self) -> Optional[np.ndarray]:
+        """
+        Get the weights.
+
+        Returns:
+        w (np.ndarray): Returns the weights.
+        """
+        return self.w
