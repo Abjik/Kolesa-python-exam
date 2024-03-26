@@ -34,9 +34,6 @@ class TreeReg:
         self.max_leafs = max_leafs if max_leafs > 1 else 2
         self.bins = bins
         self.bin_values = None  # Initialize bin_values attribute
-        
-    def __str__(self):
-        return f"MyTreeClf class: max_depth={self.max_depth}, min_samples_split={self.min_samples_split}, max_leafs={self.max_leafs}, bins={self.bins}"
     
     def fit(self,X, y):
         self.leafs_cnt = 1
