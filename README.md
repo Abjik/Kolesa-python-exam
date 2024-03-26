@@ -18,7 +18,7 @@
 
 Для прогнозирования времянных рядов нужно создать модель которая будет правильно и качественно обучена.
 
-<img src="https://www.researchgate.net/publication/353910205/figure/fig1/AS:1059279146582016@1629563237018/Work-Flow-Diagram-of-Prophet-Model.ppm "/>
+<img src="https://www.researchgate.net/publication/353910205/figure/fig1/AS:1059279146582016@1629563237018/Work-Flow-Diagram-of-Prophet-Model.ppm"/>
 
 Реализация моделей для прогназирования будут включать в себя:
 
